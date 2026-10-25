@@ -26,7 +26,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Dependencias
-        run: pip install -r requirements.txt pyinstaller==6.11.1
+        run: pip install -r requirements.txt "pyinstaller>=6.16"
       - name: Pruebas unitarias
         run: python -m unittest discover -s pruebas -v
       - name: Autoprueba desde el código
@@ -36,7 +36,7 @@ jobs:
         if: runner.os == 'Linux'
         run: xvfb-run -a python app.py --autoprueba salida-codigo
       - name: Empaquetar sin instalador
-        run: pyinstaller --noconfirm --clean --onedir --windowed --name GraficadorEncuestas app.py
+        run: pyinstaller --noconfirm --clean --onedir --windowed --collect-submodules numpy._core --name GraficadorEncuestas app.py
 
       - name: Probar el ejecutable (Windows)
         if: runner.os == 'Windows'

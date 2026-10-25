@@ -34,7 +34,7 @@ pip install -r requirements.txt
 python app.py                          # ventana
 python app.py --autoprueba salida      # 18 pruebas sin abrir la ventana, deja reporte y gráficas
 python -m unittest discover -s pruebas # pruebas unitarias
-pyinstaller --onedir --windowed --name GraficadorEncuestas app.py
+pyinstaller --onedir --windowed --collect-submodules numpy._core --name GraficadorEncuestas app.py
 ```
 
 Cada push a `main` compila y prueba el ejecutable en Windows, macOS y Linux con GitHub Actions

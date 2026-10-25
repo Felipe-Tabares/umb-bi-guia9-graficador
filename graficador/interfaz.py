@@ -17,6 +17,17 @@ ROJO = "#A4262C"
 VERDE = "#2E6B30"
 
 
+def modo_claro(ventana):
+    """En macOS con modo oscuro, Tk pinta la ventana oscura; se fija la apariencia clara para que se vea
+    igual que en Windows y los textos grises se lean."""
+    if ventana.tk.call("tk", "windowingsystem") == "aqua":
+        ventana.update_idletasks()  # Tk exige la ventana creada antes de cambiar la apariencia
+        try:
+            ventana.tk.call("::tk::unsupported::MacWindowStyle", "appearance", ventana, "aqua")
+        except tk.TclError:
+            pass
+
+
 class Aplicacion(ttk.Frame):
     def __init__(self, raiz, almacen):
         super().__init__(raiz, padding=10)
@@ -30,6 +41,7 @@ class Aplicacion(ttk.Frame):
         self.seleccion = None  # id de la categoría que se está editando
 
         raiz.title(f"Graficador de Encuestas {VERSION}")
+        modo_claro(raiz)
         raiz.geometry("1200x720")
         raiz.minsize(1000, 620)
         self.grid(sticky="nsew")
@@ -68,7 +80,7 @@ class Aplicacion(ttk.Frame):
 
         tabla = ttk.LabelFrame(panel, text="Actividades", padding=8)
         tabla.pack(fill="both", expand=True, pady=8)
-        self.arbol = ttk.Treeview(tabla, columns=("nombre", "cantidad", "pct"), show="headings", height=9,
+        self.arbol = ttk.Treeview(tabla, columns=("nombre", "cantidad", "pct"), show="headings", height=7,
                                   selectmode="browse")
         for col, texto, ancho, ali in (("nombre", "Actividad", 200, "w"), ("cantidad", "Estudiantes", 80, "e"),
                                        ("pct", "%", 55, "e")):
@@ -102,12 +114,12 @@ class Aplicacion(ttk.Frame):
         acciones = ttk.LabelFrame(panel, text="Datos", padding=8)
         acciones.pack(fill="x", pady=(8, 0))
         for i, (texto, accion) in enumerate((("Deshacer", self.deshacer),
-                                             ("Restaurar datos de la guía", self.restaurar),
+                                             ("Restaurar guía", self.restaurar),
                                              ("Importar CSV", self.importar),
                                              ("Exportar CSV", self.exportar_csv),
                                              ("Ver bitácora", self.ver_bitacora))):
-            ttk.Button(acciones, text=texto, command=accion).grid(row=i // 2, column=i % 2, sticky="ew", padx=2, pady=2)
-        acciones.columnconfigure((0, 1), weight=1)
+            ttk.Button(acciones, text=texto, command=accion).grid(row=i // 3, column=i % 3, sticky="ew", padx=2, pady=2)
+        acciones.columnconfigure((0, 1, 2), weight=1)
         return panel
 
     def _panel_grafica(self):
@@ -127,9 +139,10 @@ class Aplicacion(ttk.Frame):
         self.lienzo.get_tk_widget().grid(row=2, column=0, sticky="nsew")
         pie = ttk.Frame(panel)
         pie.grid(row=3, column=0, sticky="ew", pady=(6, 0))
-        self.lectura = ttk.Label(pie, wraplength=620)
-        self.lectura.pack(side="left", fill="x", expand=True)
+        # El botón se empaca primero para que el texto largo nunca lo empuje fuera de la ventana.
         ttk.Button(pie, text="Exportar gráfica (PNG o PDF)", command=self.exportar_grafica).pack(side="right")
+        self.lectura = ttk.Label(pie, wraplength=520)
+        self.lectura.pack(side="left", fill="x", expand=True)
         return panel
 
     # ---------- refresco ----------
@@ -244,6 +257,7 @@ class Aplicacion(ttk.Frame):
     def ver_bitacora(self):
         v = tk.Toplevel(self.raiz)
         v.title("Bitácora y trazabilidad")
+        modo_claro(v)
         v.geometry("760x460")
         marco = ttk.Frame(v, padding=10)
         marco.pack(fill="both", expand=True)
