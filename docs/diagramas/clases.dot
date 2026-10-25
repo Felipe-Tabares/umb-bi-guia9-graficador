@@ -1,0 +1,33 @@
+digraph C {
+  rankdir=TB; bgcolor="white"; pad=0.2; nodesep=0.6;
+  node [shape=plain, fontname="Arial", fontsize=10];
+  edge [fontname="Arial", fontsize=9, color="#444444"];
+  app [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#333333">
+    <tr><td bgcolor="#E8E8E8"><b>Aplicacion</b> (ttk.Frame)</td></tr>
+    <tr><td align="left">almacen, tipo, nombre, cantidad, seleccion</td></tr>
+    <tr><td align="left">refrescar() · redibujar() · guardar() · eliminar()</td></tr>
+    <tr><td align="left">deshacer() · restaurar() · importar() · exportar_csv()</td></tr>
+    <tr><td align="left">exportar_grafica() · ver_bitacora()</td></tr></table>>];
+  alm [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#333333">
+    <tr><td bgcolor="#E8E8E8"><b>Almacen</b></td></tr>
+    <tr><td align="left">ruta, db (sqlite3)</td></tr>
+    <tr><td align="left">categorias() · estado_suma() · resumen()</td></tr>
+    <tr><td align="left">agregar() · actualizar() · eliminar()</td></tr>
+    <tr><td align="left">cambiar_poblacion() · cambiar_titulo()</td></tr>
+    <tr><td align="left">deshacer() · restaurar_originales()</td></tr>
+    <tr><td align="left">importar_csv() · exportar_csv()</td></tr>
+    <tr><td align="left">bitacora() · diferencias_con_originales()</td></tr></table>>];
+  err [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#333333">
+    <tr><td bgcolor="#E8E8E8"><b>ErrorValidacion</b> (ValueError)</td></tr>
+    <tr><td align="left">mensaje listo para el usuario</td></tr></table>>];
+  graf [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#333333">
+    <tr><td bgcolor="#E8E8E8"><b>graficas</b> (módulo)</td></tr>
+    <tr><td align="left">TIPOS</td></tr>
+    <tr><td align="left">dibujar() · exportar()</td></tr>
+    <tr><td align="left">barras() · horizontales() · torta() · pareto()</td></tr></table>>];
+  auto [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#333333">
+    <tr><td bgcolor="#E8E8E8"><b>autoprueba</b> (módulo)</td></tr>
+    <tr><td align="left">ejecutar(carpeta) → 18 pruebas + reporte</td></tr></table>>];
+  app -> alm [label="usa"]; app -> graf [label="usa"];
+  alm -> err [label="lanza"]; auto -> alm; auto -> graf; auto -> app [label="prueba la ventana", style=dashed];
+}

@@ -1,0 +1,25 @@
+digraph M {
+  rankdir=LR; bgcolor="white"; pad=0.2; nodesep=0.5;
+  node [shape=plain, fontname="Arial", fontsize=10];
+  categorias [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#333333">
+    <tr><td bgcolor="#E8E8E8"><b>categorias</b></td></tr>
+    <tr><td align="left">id  INTEGER PK</td></tr><tr><td align="left">nombre  TEXT</td></tr>
+    <tr><td align="left">clave  TEXT UNIQUE</td></tr><tr><td align="left">cantidad  INTEGER ≥ 0</td></tr>
+    <tr><td align="left">orden  INTEGER</td></tr></table>>];
+  originales [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#333333">
+    <tr><td bgcolor="#E8E8E8"><b>datos_originales</b> (fija)</td></tr>
+    <tr><td align="left">orden  INTEGER PK</td></tr><tr><td align="left">nombre  TEXT</td></tr>
+    <tr><td align="left">cantidad  INTEGER</td></tr></table>>];
+  configuracion [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#333333">
+    <tr><td bgcolor="#E8E8E8"><b>configuracion</b></td></tr>
+    <tr><td align="left">clave  TEXT PK</td></tr><tr><td align="left">valor  TEXT</td></tr>
+    <tr><td align="left">(poblacion, titulo)</td></tr></table>>];
+  bitacora [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="4" color="#333333">
+    <tr><td bgcolor="#E8E8E8"><b>bitacora</b></td></tr>
+    <tr><td align="left">id  INTEGER PK</td></tr><tr><td align="left">fecha  TEXT</td></tr>
+    <tr><td align="left">accion  TEXT</td></tr><tr><td align="left">detalle  TEXT</td></tr>
+    <tr><td align="left">estado_previo  TEXT (JSON)</td></tr><tr><td align="left">deshecho  INTEGER</td></tr></table>>];
+  originales -> categorias [label="restaurar / comparar", fontname="Arial", fontsize=9, style=dashed];
+  bitacora -> categorias [label="deshacer", fontname="Arial", fontsize=9, style=dashed];
+  bitacora -> configuracion [style=dashed];
+}

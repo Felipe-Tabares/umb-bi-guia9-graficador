@@ -1,0 +1,24 @@
+digraph G {
+  rankdir=TB; bgcolor="white"; pad=0.2; nodesep=0.4; ranksep=0.45;
+  node [shape=box, style="rounded", fontname="Arial", fontsize=11, color="#333333", penwidth=1.2];
+  edge [fontname="Arial", fontsize=9, color="#555555", arrowsize=0.7];
+  usuario [label="Usuario", shape=oval];
+  subgraph cluster_prog { label="GraficadorEncuestas (carpeta portable, sin instalar)"; fontname="Arial"; fontsize=11; color="#999999"; style="dashed";
+    interfaz [label="Interfaz gráfica\ninterfaz.py (Tkinter)"];
+    datos [label="Capa de datos\ndatos.py\nvalidación · bitácora · deshacer"];
+    graf [label="Gráficas\ngraficas.py (matplotlib)\nbarras · horizontales · torta · Pareto"];
+    base [label="datos_encuesta.db\n(SQLite)", shape=cylinder];
+    auto [label="Autoprueba\nautoprueba.py"];
+  }
+  csv [label="Archivo CSV", shape=note];
+  salida [label="PNG / PDF", shape=note];
+  usuario -> interfaz [label="ingresa y edita"];
+  interfaz -> datos [label="agregar, editar,\neliminar, importar"];
+  datos -> base [label="guarda"];
+  base -> datos [label="lee"];
+  datos -> interfaz [label="datos válidos\no motivo del rechazo"];
+  interfaz -> graf [label="redibuja al\ncambiar un dato"];
+  graf -> salida [label="exportar"];
+  csv -> datos [dir=both, label="importar / exportar"];
+  auto -> datos; auto -> graf;
+}

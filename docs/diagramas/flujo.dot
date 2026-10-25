@@ -1,0 +1,23 @@
+digraph F {
+  bgcolor="white"; pad=0.2; nodesep=0.3; ranksep=0.32;
+  node [fontname="Arial", fontsize=10, color="#333333", penwidth=1.2];
+  edge [fontname="Arial", fontsize=9, color="#444444", arrowsize=0.7];
+  inicio [label="Inicio", shape=oval];
+  leer [label="Leer nombre y cantidad", shape=parallelogram];
+  n1 [label="¿Nombre vacío o\nmás de 40 caracteres?", shape=diamond];
+  n2 [label="¿Ya existe esa actividad\n(sin tildes ni mayúsculas)?", shape=diamond];
+  n3 [label="¿Cantidad es un\nentero mayor o igual a 0?", shape=diamond];
+  n4 [label="¿Total + cantidad\n≤ población?", shape=diamond];
+  err [label="Mostrar el motivo del rechazo\n(no se guarda nada)", shape=parallelogram];
+  guardar [label="Guardar en SQLite", shape=box];
+  bit [label="Registrar en la bitácora\ncon el estado anterior", shape=box];
+  graf [label="Recalcular porcentajes\ny redibujar la gráfica", shape=box];
+  fin [label="Fin", shape=oval];
+  inicio -> leer -> n1;
+  n1 -> err [label="Sí"]; n1 -> n2 [label="No"];
+  n2 -> err [label="Sí"]; n2 -> n3 [label="No"];
+  n3 -> n4 [label="Sí"]; n3 -> err [label="No"];
+  n4 -> guardar [label="Sí"]; n4 -> err [label="No"];
+  guardar -> bit -> graf -> fin;
+  err -> leer [label="corregir", style=dashed];
+}
