@@ -1,0 +1,87 @@
+# Compila el ejecutable portable en Windows, macOS y Linux y lo prueba en cada sistema.
+# Cada corrida en main publica los .zip en la versión "v1.0" del repositorio.
+name: Compilar y probar
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compilar:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, sistema: windows }
+          - { os: macos-latest, sistema: macos }
+          - { os: ubuntu-latest, sistema: linux }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Dependencias
+        run: pip install -r requirements.txt pyinstaller==6.11.1
+      - name: Pruebas unitarias
+        run: python -m unittest discover -s pruebas -v
+      - name: Autoprueba desde el código
+        if: runner.os != 'Linux'
+        run: python app.py --autoprueba salida-codigo
+      - name: Autoprueba desde el código (Linux con pantalla virtual)
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python app.py --autoprueba salida-codigo
+      - name: Empaquetar sin instalador
+        run: pyinstaller --noconfirm --clean --onedir --windowed --name GraficadorEncuestas app.py
+
+      - name: Probar el ejecutable (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath "dist\GraficadorEncuestas\GraficadorEncuestas.exe" -ArgumentList "--autoprueba","$PWD\salida-ejecutable" -Wait -PassThru
+          Get-Content salida-ejecutable\reporte.txt
+          if ($p.ExitCode -ne 0) { exit 1 }
+          Compress-Archive -Path dist\GraficadorEncuestas -DestinationPath GraficadorEncuestas-windows.zip
+      - name: Probar el ejecutable (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          dist/GraficadorEncuestas.app/Contents/MacOS/GraficadorEncuestas --autoprueba "$PWD/salida-ejecutable"
+          cat salida-ejecutable/reporte.txt
+          ditto -c -k --keepParent dist/GraficadorEncuestas.app GraficadorEncuestas-macos.zip
+      - name: Probar el ejecutable (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          xvfb-run -a dist/GraficadorEncuestas/GraficadorEncuestas --autoprueba "$PWD/salida-ejecutable"
+          cat salida-ejecutable/reporte.txt
+          cd dist && zip -qr ../GraficadorEncuestas-linux.zip GraficadorEncuestas
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GraficadorEncuestas-${{ matrix.sistema }}
+          path: GraficadorEncuestas-${{ matrix.sistema }}.zip
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reporte-${{ matrix.sistema }}
+          path: salida-ejecutable/
+
+  publicar:
+    needs: compilar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: GraficadorEncuestas-*
+          merge-multiple: true
+      - name: Publicar en la versión v1.0
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view v1.0 -R "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
+            gh release create v1.0 -R "$GITHUB_REPOSITORY" --title "Graficador de Encuestas 1.0" \
+              --notes "Descomprima el .zip de su sistema y abra GraficadorEncuestas. No requiere instalación."
+          gh release upload v1.0 GraficadorEncuestas-*.zip -R "$GITHUB_REPOSITORY" --clobber
